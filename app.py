@@ -7,7 +7,7 @@ import os
 
 from peewee import *
 
-DB = SqliteDatabase('log.db')
+db = SqliteDatabase('log.db')
 
 
 class Entry(Model):
@@ -18,16 +18,16 @@ class Entry(Model):
     timestamp = DateTimeField(default=datetime.datetime.now)
 
     class Meta:
-        database = DB
+        database = db
 
 
 class WorkLog:
 
-    def __init__(self, db):
+    def __init__(self, dbs):
         """Create the database and table if they don't exist"""
-
-        db.connect()
-        db.create_tables([Entry], safe=True)
+        dbs.bind([Entry])
+        dbs.connect()
+        dbs.create_tables([Entry], safe=True)
 
         # menus
         self.menu = OrderedDict([
@@ -39,11 +39,11 @@ class WorkLog:
 
         # search menu
         self.search_menu = OrderedDict([
-            ('1', self.search_by_date),
-            ('2', self.search_by_date_range),
-            ('3', self.search_by_name),
-            ('4', self.search_by_term),
-            ('5', self.search_by_time_spent)
+            ('a', self.search_by_date),
+            ('b', self.search_by_date_range),
+            ('c', self.search_by_name),
+            ('d', self.search_by_term),
+            ('e', self.search_by_time_spent)
         ])
 
         # edit menu
@@ -72,6 +72,7 @@ class WorkLog:
             if choice in self. menu:
                 self.clear()
                 self.menu[choice]()
+        return choice
 
     def search_loop(self):
         """ Show the search menu """
@@ -90,16 +91,22 @@ class WorkLog:
             if choice in self.search_menu:
                 self.clear()
                 self.search_menu[choice]()
+        return choice
 
     def add_entry(self):
         """Add an entry."""
 
         name = input("Name: ")
         task_title = input("Task Title: ")
-        time_spent = input("Time spent (rounded in minutes: ")
+        time_spent = self.get_int_number("Time spent (rounded in minutes: ")
         print("Notes (optional, you can leave this empty. Press ctr+d when finished.")
         note = sys.stdin.read().strip()
 
+        # add to db
+        self.add_entry_to_db(name, task_title, time_spent, note)
+
+    @staticmethod
+    def add_entry_to_db(name, task_title, time_spent, note):
         if name:
             if input("\n\nSave entry? [Yn] ").lower() != 'n':
                 Entry.create(name=name, task_title=task_title, time_spent=time_spent, note=note)
@@ -271,12 +278,14 @@ class WorkLog:
         param = {"note": note}
         self.update_entry(entry, param)
 
-    def update_entry(self, entry, param_dict):
+    @staticmethod
+    def update_entry(entry, param_dict):
         entry.update(**param_dict).execute()
         fields = [ k for k, _ in param_dict.items()]
         input(f"\nLog field of '{', '.join(fields)}' edited successfully! Press Enter to continue")
 
-    def get_date(self, msg, timestamp=False):
+    @staticmethod
+    def get_date(msg, timestamp=False):
         """
         Get user input date
         :param msg: string, additional msg to display to user
@@ -299,9 +308,9 @@ class WorkLog:
             else:
                 return date
 
-    def get_int_number(self, msg):
+    @staticmethod
+    def get_int_number(msg):
         """Get user input integer number"""
-        self.clear()
         while True:
 
             user_input = input(msg)
@@ -313,13 +322,12 @@ class WorkLog:
             else:
                 return int_num
 
-    def clear(self):
+    @staticmethod
+    def clear():
         os.system('cls' if os.name == 'nt' else 'clear')
 
-    def start(self):
-        self.menu_loop()
 
 
 if __name__ == "__main__":
-    work_log = WorkLog(DB)
-    work_log.start()
+    work_log = WorkLog(db)
+    work_log.menu_loop()
