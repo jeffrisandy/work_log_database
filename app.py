@@ -99,8 +99,11 @@ class WorkLog:
         name = input("Name: ")
         task_title = input("Task Title: ")
         time_spent = self.get_int_number("Time spent (rounded in minutes: ")
-        print("Notes (optional, you can leave this empty. Press ctr+d when finished.")
-        note = sys.stdin.read().strip()
+        try:
+            print("Notes (optional, you can leave this empty. When finished press 'ctr+d' for unix user or 'ctr+z then enter' for window user.")
+            note = sys.stdin.read().strip()
+        except EOFError:
+            note = ""
 
         # add to db
         self.add_entry_to_db(name, task_title, time_spent, note)
