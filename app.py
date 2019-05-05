@@ -99,8 +99,8 @@ class WorkLog:
         name = input("Name: ")
         task_title = input("Task Title: ")
         time_spent = self.get_int_number("Time spent (rounded in minutes: ")
+        print("Notes (optional, you can leave this empty. When finished press 'ctr+d' for unix user or 'ctr+z then enter' for window user.")
         try:
-            print("Notes (optional, you can leave this empty. When finished press 'ctr+d' for unix user or 'ctr+z then enter' for window user.")
             note = sys.stdin.read().strip()
         except EOFError:
             note = ""
@@ -250,36 +250,48 @@ class WorkLog:
         self.clear()
         name = input("Name : ")
         param = {'name': name}
-        self.update_entry(entry, param)
+        if input("\n\nSave entry? [Yn] ").lower() != 'n':
+            self.update_entry(entry, param)
 
     def edit_date(self, entry):
         """Date"""
         self.clear()
         timestamp = self.get_date("Edit Date", timestamp=True)
         param = {"timestamp": timestamp}
-        self.update_entry(entry, param)
+        if input("\n\nSave entry? [Yn] ").lower() != 'n':
+            self.update_entry(entry, param)
 
     def edit_task_title(self, entry):
         """Task title"""
         self.clear()
         task_title = input("Task title: ")
         param = {"task_title": task_title}
-        self.update_entry(entry, param)
+        if input("\n\nSave entry? [Yn] ").lower() != 'n':
+            self.update_entry(entry, param)
 
     def edit_time_spent(self, entry):
         """Time spent"""
         self.clear()
         time_spent = self.get_int_number("Time Spent (rounded minutes): ")
         param = {"time_spent": time_spent}
-        self.update_entry(entry, param)
+
+        if input("\n\nSave entry? [Yn] ").lower() != 'n':
+            self.update_entry(entry, param)
+
 
     def edit_note(self, entry):
         """Note"""
         self.clear()
-        print("Note (press ctr+d when finished) : ")
-        note = sys.stdin.read().strip()
+        print("Notes (optional, you can leave this empty. When finished press 'ctr+d' for unix user or 'ctr+z then enter' for window user.")
+        try:
+            note = sys.stdin.read().strip()
+        except EOFError:
+            note = ""
         param = {"note": note}
-        self.update_entry(entry, param)
+        if input("\n\nSave entry? [Yn] ").lower() != 'n':
+            self.update_entry(entry, param)
+
+
 
     @staticmethod
     def update_entry(entry, param_dict):
